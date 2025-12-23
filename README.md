@@ -36,6 +36,20 @@
 
 ## Installation
 
+Make sure that your machine already installed python
+Or you can get it here:
+#### Unix-Based Systems (Linux / macOS)
+```bash
+brew install python
+```
+
+#### Windows Environments
+
+**PowerShell**
+```powershell
+winget install Python.Python.3.12
+```
+
 ### Package Manager Installation
 
 #### Homebrew (macOS and Linux)
