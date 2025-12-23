@@ -103,34 +103,6 @@ curl -fsSL https://raw.githubusercontent.com/nhatpse/git-switch/main/install.sh 
 python3 ~/.git-profile-manager/git_profiles.py
 ```
 
-## Platform Compatibility Matrix
-
-### Linux Distributions
-- Complete feature set availability
-- Native ANSI terminal color support
-- Clipboard abstraction layer (xclip/xsel/wl-copy)
-- POSIX-compliant file permission enforcement
-
-### macOS
-- Full feature parity with Linux
-- Native clipboard API integration (pbcopy)
-- System browser automation support
-- Unix permission model compatibility
-
-### Windows Operating Systems
-- **Windows 10 and Later** — Comprehensive feature support
-- **Git Bash Environment** — Complete functionality
-- **Command Prompt** — Core feature subset
-- Windows Terminal ANSI color rendering (Windows 10+)
-- PowerShell clipboard integration
-- Native Windows path resolution
-
-#### Windows System Requirements
-- Windows 10 or newer (recommended for full feature set)
-- Python 3.6 or higher
-- Git for Windows installation
-- OpenSSH Client (Windows 10+) or Git Bash environment
-
 ## Operational Modes
 
 ### Context-Sensitive Behavior
