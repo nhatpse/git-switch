@@ -43,8 +43,7 @@ Or you can get it here:
 brew install python
 ```
 
-#### Windows Environments
-
+#### Windows
 **PowerShell**
 ```powershell
 winget install Python.Python.3.12
@@ -214,32 +213,6 @@ Enter your choice (0-4):
 - **macOS** — pbcopy (system native)
 - **Windows** — PowerShell or clip.exe (system native)
 
-## Evolution from Version 1.0
-
-### Engineering Improvements
-- Architectural consolidation (reduced from 3-file to 2-file structure)
-- Object-oriented design with comprehensive exception handling
-- Type annotation throughout codebase
-- Platform abstraction layer implementation
-
-### Security Enhancements
-- SSH key passphrase support with secure input
-- Platform-appropriate file permission enforcement
-- Input sanitization and validation framework
-- Secure subprocess invocation patterns
-
-### User Experience Refinement
-- ANSI-enhanced terminal interface with ASCII typography
-- Platform-specific error messaging and troubleshooting
-- Contextual error reporting with actionable guidance
-- Visual progress indicators and confirmation workflows
-
-### Performance and Distribution
-- Optimized startup sequence and runtime efficiency
-- Zero external dependencies (Python standard library only)
-- Stateless direct execution mode
-- Proper resource cleanup and garbage collection
-
 ## Cross-Platform Feature Matrix
 
 | Capability | Linux | macOS | Windows 10+ | Windows Legacy |
@@ -256,8 +229,4 @@ Enter your choice (0-4):
 
 Released under MIT License. Refer to LICENSE file for complete terms.
 
----
-
-**Professional-grade tooling for developers managing multiple GitHub identities**
-
-**Copyright (c) NHATPMIO**
+**Copyright (c) NHATPSE**
