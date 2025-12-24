@@ -95,48 +95,7 @@ function Save-Profiles($Data) {
     $Data | ConvertTo-Json -Depth 5 | Set-Content $ProfilesFile -Encoding UTF8
 }
 
-function Get-Git-Current {
-    try {
-        $Name = git config --global user.name
-        $Email = git config --global user.email
-        if (-not $Name) { $Name = "Not Set" }
-        if (-not $Email) { $Email = "Not Set" }
-        return @{ Name = $Name; Email = $Email }
-    } catch {
-        return @{ Name = "Git Not Found"; Email = "Check Install" }
-    }
-}
 
-# --- SSH LOGIC ---
-
-function Generate-SSH-Key {
-    param($Email, $Alias)
-    
-    $KeyPath = "$SSHDir\id_rsa_$Alias"
-    
-    if (Test-Path $KeyPath) {
-        Write-Color "  [!] SSH Key already exists for this alias. Using existing key." -Color Yellow
-        return $KeyPath
-    }
-
-    Write-Color "  [INFO] Generating new SSH Key..." -Color Cyan
-    
-    # Gọi ssh-keygen, passphase rỗng (-N "") để tự động hóa
-    try {
-        # FIX: Dùng '""' (bao quanh bởi nháy đơn) để PowerShell truyền đúng chuỗi rỗng cho ssh-keygen
-        & ssh-keygen -t rsa -b 4096 -C "$Email" -f "$KeyPath" -N '""' | Out-Null
-        
-        if ($LASTEXITCODE -eq 0) {
-            Write-Color "  [✔] SSH Key generated successfully." -Color Green
-            return $KeyPath
-        } else {
-            throw "ssh-keygen failed."
-        }
-    } catch {
-        Write-Color "  [X] Failed to generate SSH Key. Ensure OpenSSH is installed." -Color Red
-        return $null
-    }
-}
 
 function Update-SSH-Config {
     param($Alias, $KeyPath)
@@ -272,6 +231,47 @@ function Test-Connection-Action {
     Test-GitHub-Connection -Alias $Selected.alias
 }
 
+function Get-Git-Current {
+    try {
+        # FIX: Thêm 2>$null để chặn rác output nếu git chưa config
+        $Name = git config --global user.name 2>$null
+        $Email = git config --global user.email 2>$null
+        if (-not $Name) { $Name = "Not Set" }
+        if (-not $Email) { $Email = "Not Set" }
+        return @{ Name = $Name; Email = $Email }
+    } catch {
+        return @{ Name = "Git Not Found"; Email = "Check Install" }
+    }
+}
+
+function Generate-SSH-Key {
+    param($Email, $Alias)
+    
+    $KeyPath = "$SSHDir\id_rsa_$Alias"
+    
+    if (Test-Path $KeyPath) {
+        Write-Color "   [!] SSH Key already exists for this alias. Using existing key." -Color Yellow
+        return $KeyPath
+    }
+
+    Write-Color "   [INFO] Generating new SSH Key..." -Color Cyan
+    
+    # FIX: Pipe thẳng vào Out-Null để chặn dòng "Generating public/private..."
+    try {
+        & ssh-keygen -t rsa -b 4096 -C "$Email" -f "$KeyPath" -N '""' 2>&1 | Out-Null
+        
+        if (Test-Path $KeyPath) {
+            Write-Color "   [✔] SSH Key generated successfully." -Color Green
+            return $KeyPath
+        } else {
+            throw "ssh-keygen failed."
+        }
+    } catch {
+        Write-Color "   [X] Failed to generate SSH Key. Ensure OpenSSH is installed." -Color Red
+        return $null
+    }
+}
+
 function Test-GitHub-Connection {
     param($Alias)
     $HostAlias = "github.com-$Alias"
@@ -279,11 +279,12 @@ function Test-GitHub-Connection {
     
     $OutputStr = ""
     try {
-        # FIX: Thêm pipe | ForEach-Object { "$_" }
-        # Tác dụng: Biến mọi ErrorRecord thành String thuần túy ngay lập tức
-        # Giúp chặn hoàn toàn dòng lỗi đỏ "NativeCommandError"
-        $Output = & ssh -T "git@$HostAlias" 2>&1 | ForEach-Object { "$_" }
-        $OutputStr = $Output | Out-String
+        # FIX QUAN TRỌNG: 
+        # 1. -o BatchMode=yes: Chặn treo script nếu SSH hỏi password/key
+        # 2. -o StrictHostKeyChecking=accept-new: Tự động nhận host mới (không hỏi yes/no)
+        # 3. | Out-String: Ép mọi lỗi thành Text thường để không vỡ khung
+        $Output = & ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -T "git@$HostAlias" 2>&1 | Out-String
+        $OutputStr = $Output
     } catch {
         $OutputStr = $_.Exception.Message
     }
@@ -293,8 +294,11 @@ function Test-GitHub-Connection {
         return $true
     } else {
         Write-Color "   [X] Connection FAILED." -Color Red
-        # Clean bớt dòng chữ thừa nếu có
-        $CleanErr = $OutputStr -replace "ssh.exe : ", ""
+        
+        # Làm sạch thông báo lỗi để hiển thị đẹp hơn
+        $CleanErr = $OutputStr -replace "[\r\n]+", " " -replace "ssh: ", ""
+        if ($CleanErr.Length -gt 65) { $CleanErr = $CleanErr.Substring(0, 62) + "..." }
+        
         Write-Color "   [DEBUG] $CleanErr" -Color DarkGray
         return $false
     }
