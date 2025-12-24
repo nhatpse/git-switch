@@ -58,9 +58,6 @@ function Draw-Header {
     Draw-Sep
 }
 
-
-
-
 # -------------------------- CORE LOGIC (PORTED FROM PYTHON) --------------------------
 
 
